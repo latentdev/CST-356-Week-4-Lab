@@ -1,5 +1,6 @@
 ﻿using CST_356_Week_4_Lab.Data;
 using CST_356_Week_4_Lab.Data.Entities;
+using CST_356_Week_4_Lab.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,22 +14,19 @@ namespace CST_356_Week_4_Lab.Controllers
         // GET: User
         public ActionResult Index()
         {
-            //if (Database.Users == null)
-            //{
-            //    Database.Users = new List<User>();
-            //}
             return View(GetAllUsers());
         }
 
-        private IEnumerable<User> GetAllUsers()
+        private IEnumerable<UserViewModel> GetAllUsers()
         {
-            var userViewModels = new List<User>();
+            var userViewModels = new List<UserViewModel>();
 
             var dbContext = new DatabaseContext();
 
             foreach (var user in dbContext.Users)
             {
-                userViewModels.Add(user);
+                var userViewModel = MapToUserViewModel(user);
+                userViewModels.Add(userViewModel);
             }
 
             return userViewModels;
@@ -41,17 +39,18 @@ namespace CST_356_Week_4_Lab.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create(User user)
+        public ActionResult Create(UserViewModel userViewModel)
         {
-            SaveUser(user);
-            //if (!user.IsValid())
-            //    return View(user);
-            //if (Database.Users == null)
-            //{
-            //    Database.Users = new List<User>();
-            //}
-            //Database.Users.Add(user);
-            return RedirectToAction("Index");
+            if (ModelState.IsValid)
+            {
+                var user = MapToUser(userViewModel);
+                SaveUser(user);
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                return View();
+            }
         }
 
         private void SaveUser(User user)
@@ -59,6 +58,31 @@ namespace CST_356_Week_4_Lab.Controllers
             var dbContext = new DatabaseContext();
             dbContext.Users.Add(user);
             dbContext.SaveChanges();
+        }
+
+        private User MapToUser(UserViewModel userViewModel)
+        {
+            return new User
+            {
+                ID = userViewModel.ID,
+                FirstName = userViewModel.FirstName,
+                MiddleName = userViewModel.MiddleName,
+                LastName = userViewModel.LastName,
+                Email = userViewModel.Email,
+                YearsInSchool = userViewModel.YearsInSchool
+            };
+        }
+        private UserViewModel MapToUserViewModel(User user)
+        {
+            return new UserViewModel
+            {
+                ID = user.ID,
+                FirstName = user.FirstName,
+                MiddleName = user.MiddleName,
+                LastName = user.LastName,
+                Email = user.Email,
+                YearsInSchool = user.YearsInSchool
+            };
         }
     }
 }

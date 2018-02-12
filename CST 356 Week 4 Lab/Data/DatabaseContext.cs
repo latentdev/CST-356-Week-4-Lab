@@ -21,6 +21,7 @@ namespace CST_356_Week_4_Lab.Data
         }
 
         public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Class> Classes { get; set; }
     }
 
     public class AppDbInitializer : DropCreateDatabaseIfModelChanges<DatabaseContext>

@@ -14,13 +14,15 @@ namespace CST_356_Week_4_Lab.Controllers
         // GET: Classes
         public ActionResult Index(int userID)
         {
+            ViewBag.userID = userID;
             var classes = GetClasses(userID);
-            return View();
+            return View(classes);
         }
 
         public ActionResult Create(int userID)
         {
-            return View(userID);
+            ViewBag.userID = userID;
+            return View();
         }
 
         [HttpPost]
@@ -35,7 +37,77 @@ namespace CST_356_Week_4_Lab.Controllers
                 return View();
         }
 
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var @class = GetClass(id);
+
+            return View(@class);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(ClassViewModel classViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                UpdateClass(classViewModel);
+
+                return RedirectToAction("Index", new { userID = classViewModel.UserID });
+            }
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Details(int id)
+        {
+            var @class = GetClass(id);
+            return View(@class);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(int id)
+        {
+            DeleteClass(id);
+
+            return RedirectToAction("Index", new { userID = id });
+        }
+
         #region Helper
+
+        private ClassViewModel GetClass(int id)
+        {
+            var dbContext = new DatabaseContext();
+
+            var @class = dbContext.Classes.Find(id);
+
+            return MapToClassViewModel(@class);
+        }
+
+        private void DeleteClass(int id)
+        {
+            var dbContext = new DatabaseContext();
+
+            var @class = dbContext.Classes.Find(id);
+
+            if (@class != null)
+            {
+                dbContext.Classes.Remove(@class);
+                dbContext.SaveChanges();
+            }
+        }
+
+        private void UpdateClass(ClassViewModel classViewModel)
+        {
+            var dbContext = new DatabaseContext();
+
+            var @class = dbContext.Classes.Find(classViewModel.ID);
+
+            CopyToClass(classViewModel, @class);
+
+            dbContext.SaveChanges();
+        }
+
         private IEnumerable<ClassViewModel> GetClasses(int userID)
         {
             var classViewModels = new List<ClassViewModel>();
@@ -52,14 +124,25 @@ namespace CST_356_Week_4_Lab.Controllers
 
             return classViewModels;
         }
-        
+
+        private void CopyToClass(ClassViewModel classViewModel, Class @class)
+        {
+            @class.ID = classViewModel.ID;
+            @class.CRN = classViewModel.CRN;
+            @class.ClassName = classViewModel.ClassName;
+            @class.StartTime = classViewModel.StartTime;
+            @class.EndTime = classViewModel.EndTime;
+            @class.Instructor = classViewModel.Instructor;
+            @class.UserID = classViewModel.UserID;
+        }
+
         private void Save(ClassViewModel classViewModel)
         {
             var dbContext = new DatabaseContext();
 
-            var pet = MapToClass(classViewModel);
+            var @class = MapToClass(classViewModel);
 
-            dbContext.Classes.Add(pet);
+            dbContext.Classes.Add(@class);
 
             dbContext.SaveChanges();
         }

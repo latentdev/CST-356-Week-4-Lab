@@ -22,6 +22,10 @@ namespace CST_356_Week_4_Lab.Data
 
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Class> Classes { get; set; }
+
+        public System.Data.Entity.DbSet<CST_356_Week_4_Lab.Models.ClassViewModel> ClassViewModels { get; set; }
+
+        public System.Data.Entity.DbSet<CST_356_Week_4_Lab.Models.UserViewModel> UserViewModels { get; set; }
     }
 
     public class AppDbInitializer : DropCreateDatabaseIfModelChanges<DatabaseContext>

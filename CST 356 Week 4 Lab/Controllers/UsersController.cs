@@ -32,6 +32,8 @@ namespace CST_356_Week_4_Lab.Controllers
             return userViewModels;
         }
 
+
+        #region Actions
         [HttpGet]
         public ActionResult Create()
         {
@@ -53,11 +55,91 @@ namespace CST_356_Week_4_Lab.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult Edit(int id)
+        {
+            var user = GetUser(id);
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(UserViewModel userViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                UpdateUser(userViewModel);
+
+                return RedirectToAction("Index");
+            }
+
+            return View();
+        }
+
+        [HttpGet]
+        public ActionResult Details(int id)
+        {
+            var user = GetUser(id);
+            return View(user);
+        }
+
+        [HttpGet]
+        public ActionResult Delete(int id)
+        {
+            DeleteUser(id);
+
+            return RedirectToAction("Index");
+        }
+        #endregion
+
+        #region Helper
+        private void DeleteUser(int id)
+        {
+            var dbContext = new DatabaseContext();
+
+            var user = dbContext.Users.Find(id);
+
+            if (user != null)
+            {
+                dbContext.Users.Remove(user);
+                dbContext.SaveChanges();
+            }
+        }
+
+        private UserViewModel GetUser(int id)
+        {
+            var dbContext = new DatabaseContext();
+
+            var user = dbContext.Users.Find(id);
+
+            return MapToUserViewModel(user);
+        }
+
         private void SaveUser(User user)
         {
             var dbContext = new DatabaseContext();
             dbContext.Users.Add(user);
             dbContext.SaveChanges();
+        }
+
+        private void UpdateUser(UserViewModel userViewModel)
+        {
+            var dbContext = new DatabaseContext();
+
+            var user = dbContext.Users.Find(userViewModel.ID);
+
+            CopyToUser(userViewModel, user);
+
+            dbContext.SaveChanges();
+        }
+
+        private void CopyToUser(UserViewModel userViewModel, User user)
+        {
+            user.FirstName = userViewModel.FirstName;
+            user.MiddleName = userViewModel.MiddleName;
+            user.LastName = userViewModel.LastName;
+            user.Email = userViewModel.Email;
+            user.YearsInSchool = userViewModel.YearsInSchool;
         }
 
         private User MapToUser(UserViewModel userViewModel)
@@ -72,6 +154,7 @@ namespace CST_356_Week_4_Lab.Controllers
                 YearsInSchool = userViewModel.YearsInSchool
             };
         }
+
         private UserViewModel MapToUserViewModel(User user)
         {
             return new UserViewModel
@@ -84,5 +167,6 @@ namespace CST_356_Week_4_Lab.Controllers
                 YearsInSchool = user.YearsInSchool
             };
         }
+        #endregion
     }
 }
